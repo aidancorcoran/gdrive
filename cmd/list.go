@@ -1,45 +1,6 @@
 /*
-// Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
-// */
-// package cmd
-
-// import (
-// 	"fmt"
-
-// 	"github.com/spf13/cobra"
-// )
-
-// // listCmd represents the list command
-// var listCmd = &cobra.Command{
-// 	Use:   "list",
-// 	Short: "A brief description of your command",
-// 	Long: `A longer description that spans multiple lines and likely contains examples
-// and usage of using your command. For example:
-
-// Cobra is a CLI library for Go that empowers applications.
-// This application is a tool to generate the needed files
-// to quickly create a Cobra application.`,
-// 	Run: func(cmd *cobra.Command, args []string) {
-// 		fmt.Println("list called")
-// 	},
-// }
-
-// func init() {
-// 	rootCmd.AddCommand(listCmd)
-
-// 	// Here you will define your flags and configuration settings.
-
-// 	// Cobra supports Persistent Flags which will work for this command
-// 	// and all subcommands, e.g.:
-// 	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-// 	// Cobra supports local flags which will only run when this command
-// 	// is called directly, e.g.:
-// 	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-// }
-
-// cmd/list.go
+Copyright © 2024 Aidan Corcoran <aidancorcoran.dev@gmail.com>
+*/
 
 package cmd
 
@@ -50,7 +11,12 @@ import (
 	"gdrive/pkg/auth"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
+
+var flag_queries = map[string]string{
+	"shared": "sharedWithMe",
+}
 
 var listCmd = &cobra.Command{
 	Use:   "list",
@@ -61,8 +27,20 @@ var listCmd = &cobra.Command{
 			log.Fatalf("Unable to retrieve Drive client: %v", err)
 		}
 
-		r, err := srv.Files.List().PageSize(10).
-			Fields("nextPageToken, files(id, name)").Do()
+		var query string
+		for key, value := range flag_queries {
+			flag_exist, err := cmd.Flags().GetBool(key)
+			if err != nil {
+				log.Fatalf("Unable to retrieve files: %v", err)
+			} else if flag_exist {
+				query += value
+			}
+		}
+
+		//"'me' in owners"
+		r, err := srv.Files.List().Q(query).Do()
+		// .PageSize(50).
+		// 	Fields("nextPageToken, files(id, name)").Do()
 		if err != nil {
 			log.Fatalf("Unable to retrieve files: %v", err)
 		}
@@ -78,6 +56,14 @@ var listCmd = &cobra.Command{
 	},
 }
 
+func handleFlags(flags *pflag.FlagSet) (query string) {
+	// var query string
+
+	return query
+}
+
 func init() {
 	rootCmd.AddCommand(listCmd)
+
+	listCmd.Flags().BoolP("shared", "s", false, "List only files shared with your Google account.")
 }
