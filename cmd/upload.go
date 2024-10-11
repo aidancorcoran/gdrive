@@ -36,13 +36,13 @@ var upload_cmd = &cobra.Command{
 		defer f.Close()
 
 		file_name := filepath.Base(file_path)
-		mimeType := mime.TypeByExtension(filepath.Ext(file_name))
-		if mimeType == "" {
-			mimeType = "application/octet-stream"
+		mime_type := mime.TypeByExtension(filepath.Ext(file_name))
+		if mime_type == "" {
+			mime_type = "application/octet-stream"
 		}
 
 		file := &drive.File{Name: file_name}
-		res, err := srv.Files.Create(file).Media(f, googleapi.ContentType(mimeType)).Do()
+		res, err := srv.Files.Create(file).Media(f, googleapi.ContentType(mime_type)).Do()
 		if err != nil {
 			log.Fatalf("Error uploading file: %v", err)
 		}
