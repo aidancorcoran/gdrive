@@ -11,7 +11,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"gdrive/pkg/auth"
+	"github.com/aidancorcoran/gdrive/pkg/auth"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/api/drive/v3"

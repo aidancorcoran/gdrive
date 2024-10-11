@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"log"
 
-	"gdrive/pkg/auth"
+	"github.com/aidancorcoran/gdrive/pkg/auth"
 
 	"github.com/spf13/cobra"
 )
