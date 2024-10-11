@@ -11,7 +11,6 @@ import (
 	"gdrive/pkg/auth"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 var flag_queries = map[string]string{
@@ -27,15 +26,7 @@ var listCmd = &cobra.Command{
 			log.Fatalf("Unable to retrieve Drive client: %v", err)
 		}
 
-		var query string
-		for key, value := range flag_queries {
-			flag_exist, err := cmd.Flags().GetBool(key)
-			if err != nil {
-				log.Fatalf("Unable to retrieve files: %v", err)
-			} else if flag_exist {
-				query += value
-			}
-		}
+		var query string = handleFlags(cmd)
 
 		//"'me' in owners"
 		r, err := srv.Files.List().Q(query).Do()
@@ -56,8 +47,18 @@ var listCmd = &cobra.Command{
 	},
 }
 
-func handleFlags(flags *pflag.FlagSet) (query string) {
-	// var query string
+func handleFlags(cmd *cobra.Command) (query string) {
+	for key, value := range flag_queries {
+		flag_exist, err := cmd.Flags().GetBool(key)
+		if err != nil {
+			log.Fatalf("Unable to retrieve files: %v", err)
+		} else if flag_exist {
+			query += value
+		} else {
+			// Default query command when just running gdrive list
+			query += "'me' in owners"
+		}
+	}
 
 	return query
 }
