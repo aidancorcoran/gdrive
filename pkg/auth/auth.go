@@ -17,25 +17,25 @@ import (
 )
 
 func getClient(config *oauth2.Config) *http.Client {
-	tokFile := "token.json"
-	tok, err := tokenFromFile(tokFile)
+	tok_file := "token.json"
+	tok, err := tokenFromFile(tok_file)
 	if err != nil {
 		tok = getTokenFromWeb(config)
-		saveToken(tokFile, tok)
+		saveToken(tok_file, tok)
 	}
 	return config.Client(context.Background(), tok)
 }
 
 func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
-	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	fmt.Printf("Go to the following link in your browser then type the authorization code:\n%v\n", authURL)
+	auth_url := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	fmt.Printf("Go to the following link in your browser then type the authorization code:\n%v\n", auth_url)
 
-	var authCode string
-	if _, err := fmt.Scan(&authCode); err != nil {
+	var auth_code string
+	if _, err := fmt.Scan(&auth_code); err != nil {
 		log.Fatalf("Unable to read authorization code: %v", err)
 	}
 
-	tok, err := config.Exchange(context.TODO(), authCode)
+	tok, err := config.Exchange(context.TODO(), auth_code)
 	if err != nil {
 		log.Fatalf("Unable to retrieve token from web: %v", err)
 	}

@@ -18,30 +18,30 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
-var uploadCmd = &cobra.Command{
+var upload_cmd = &cobra.Command{
 	Use:   "upload [file path]",
 	Short: "Upload a file to Google Drive",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		filePath := args[0]
+		file_path := args[0]
 		srv, err := auth.GetDriveService()
 		if err != nil {
 			log.Fatalf("Unable to retrieve Drive client: %v", err)
 		}
 
-		f, err := os.Open(filePath)
+		f, err := os.Open(file_path)
 		if err != nil {
-			log.Fatalf("Error opening %q: %v", filePath, err)
+			log.Fatalf("Error opening %q: %v", file_path, err)
 		}
 		defer f.Close()
 
-		fileName := filepath.Base(filePath)
-		mimeType := mime.TypeByExtension(filepath.Ext(fileName))
+		file_name := filepath.Base(file_path)
+		mimeType := mime.TypeByExtension(filepath.Ext(file_name))
 		if mimeType == "" {
 			mimeType = "application/octet-stream"
 		}
 
-		file := &drive.File{Name: fileName}
+		file := &drive.File{Name: file_name}
 		res, err := srv.Files.Create(file).Media(f, googleapi.ContentType(mimeType)).Do()
 		if err != nil {
 			log.Fatalf("Error uploading file: %v", err)
@@ -52,5 +52,5 @@ var uploadCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(uploadCmd)
+	root_cmd.AddCommand(upload_cmd)
 }

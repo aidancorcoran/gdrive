@@ -17,7 +17,7 @@ var flag_queries = map[string]string{
 	"shared": "sharedWithMe",
 }
 
-var listCmd = &cobra.Command{
+var list_cmd = &cobra.Command{
 	Use:   "list",
 	Short: "List files in Google Drive",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -27,9 +27,7 @@ var listCmd = &cobra.Command{
 		}
 
 		var query string = handleFlags(cmd)
-
-		//"'me' in owners"
-		r, err := srv.Files.List().Q(query).Do()
+		file_list, err := srv.Files.List().Q(query).Do()
 		// .PageSize(50).
 		// 	Fields("nextPageToken, files(id, name)").Do()
 		if err != nil {
@@ -37,10 +35,10 @@ var listCmd = &cobra.Command{
 		}
 
 		fmt.Println("Files:")
-		if len(r.Files) == 0 {
+		if len(file_list.Files) == 0 {
 			fmt.Println("No files found.")
 		} else {
-			for _, i := range r.Files {
+			for _, i := range file_list.Files {
 				fmt.Printf("%s (%s)\n", i.Name, i.Id)
 			}
 		}
@@ -64,7 +62,7 @@ func handleFlags(cmd *cobra.Command) (query string) {
 }
 
 func init() {
-	rootCmd.AddCommand(listCmd)
+	root_cmd.AddCommand(list_cmd)
 
-	listCmd.Flags().BoolP("shared", "s", false, "List only files shared with your Google account.")
+	list_cmd.Flags().BoolP("shared", "s", false, "List only files shared with your Google account.")
 }
