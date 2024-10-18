@@ -46,15 +46,16 @@ var list_cmd = &cobra.Command{
 }
 
 func handleFlags(cmd *cobra.Command) (query string) {
+	// Iterate over the possible list command flags and determine if they are present
 	for key, value := range flag_queries {
 		flag_exist, err := cmd.Flags().GetBool(key)
 		if err != nil {
-			log.Fatalf("Unable to retrieve files: %v", err)
-		} else if flag_exist {
+			log.Fatalf("Unable to retrieve flags: %v", err)
+		} else if flag_exist { // If the flag exists append its query value
 			query += value
 		} else {
 			// Default query command when just running gdrive list
-			query += "'me' in owners"
+			query += "'me' in owners and trashed=false"
 		}
 	}
 
