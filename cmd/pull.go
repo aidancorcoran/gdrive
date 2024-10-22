@@ -77,16 +77,15 @@ var pull_cmd = &cobra.Command{
 		file_id, mime_type := getFileIdAndMimeType(srv, file_name)
 
 		// Convert this functionality to a function
-		if value, exists := gdrive_mime_types[mime_type]; exists {
-			fmt.Printf("GDrive Specific Mime Type: %s\nValue: %s\n", mime_type, value)
-		} else if value, exists := other_mime_types[mime_type]; exists {
-			fmt.Printf("Other mime type: %s\nValue: %s\n", mime_type, value)
-		} else {
-			fmt.Printf("Mime type %s does not exist\n", mime_type)
+		file_extension, err := getFileExtension(mime_type)
+		if err != nil {
+			log.Fatalf("Error: %v", err)
 		}
-
+		// Need to run .get for the other_mime_types
+		print(file_extension)
+		srv.Files.Get()
 		// Add logic to handle export the file if it is a gdrive_mime_type and a get function if it is a other mime type
-		resp, err := srv.Files.Export(file_id, "application/pdf").Download()
+		resp, err := srv.Files.Export(file_id, mime_type).Download()
 		if err != nil {
 			log.Fatalf("Unable to export file: %v", err)
 		}
@@ -123,6 +122,15 @@ func getFileIdAndMimeType(srv *drive.Service, file_name string) (string, string)
 	file := file_list.Files[0]
 	fmt.Printf("Found file: %s (ID: %s, MIME Type: %s)\n", file_name, file.Id, file.MimeType)
 	return file.Id, file.MimeType
+}
+
+func getFileExtension(mime_type string) (string, error) {
+	if extension, exists := gdrive_mime_types[mime_type]; exists {
+		return extension, nil
+	} else if extension, exists := other_mime_types[mime_type]; exists {
+		return extension, nil
+	}
+	return "", fmt.Errorf("unknown MIME Type: %s", mime_type)
 }
 
 func init() {
