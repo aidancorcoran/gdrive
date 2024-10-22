@@ -15,6 +15,52 @@ import (
 	"google.golang.org/api/drive/v3"
 )
 
+// Convert Google Drive Specific MIME types to file extensions
+var gdrive_mime_types = map[string]string{
+	"application/vnd.google-apps.audio":        ".mp3",
+	"application/vnd.google-apps.document":     ".docx",
+	"application/vnd.google-apps.drive-sdk":    ".unknown",
+	"application/vnd.google-apps.drawing":      ".png",
+	"application/vnd.google-apps.file":         ".unknown",
+	"application/vnd.google-apps.folder":       ".folder",
+	"application/vnd.google-apps.form":         ".form",
+	"application/vnd.google-apps.fusiontable":  ".table",
+	"application/vnd.google-apps.jam":          ".jam",
+	"application/vnd.google-apps.mail-layout":  ".email",
+	"application/vnd.google-apps.map":          ".map",
+	"application/vnd.google-apps.photo":        ".jpg",
+	"application/vnd.google-apps.presentation": ".pptx",
+	"application/vnd.google-apps.script":       ".js",
+	"application/vnd.google-apps.shortcut":     ".shortcut",
+	"application/vnd.google-apps.site":         ".html",
+	"application/vnd.google-apps.spreadsheet":  ".xlsx",
+	"application/vnd.google-apps.unknown":      ".unknown",
+	"application/vnd.google-apps.vid":          ".mp4",
+	"application/vnd.google-apps.video":        ".mp4",
+}
+
+// Convert other MIME types to file extensions
+var other_mime_types = map[string]string{
+	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+	"application/vnd.oasis.opendocument.text":                                 ".odt",
+	"application/rtf":      ".rtf",
+	"application/pdf":      ".pdf",
+	"text/plain":           ".txt",
+	"application/zip":      ".zip",
+	"application/epub+zip": ".epub",
+	"text/markdown":        ".md",
+	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
+	"application/x-vnd.oasis.opendocument.spreadsheet":                  ".ods",
+	"text/csv":                  ".csv",
+	"text/tab-separated-values": ".tsv",
+	"application/vnd.openxmlformats-officedocument.presentationml.presentation": ".pptx",
+	"application/vnd.oasis.opendocument.presentation":                           ".odp",
+	"image/jpeg":    ".jpg",
+	"image/png":     ".png",
+	"image/svg+xml": ".svg",
+	"application/vnd.google-apps.script+json": ".json",
+}
+
 var pull_cmd = &cobra.Command{
 	Use:   "pull [file name]",
 	Short: "Download a file from Google Drive",
@@ -30,6 +76,16 @@ var pull_cmd = &cobra.Command{
 		// https://developers.google.com/drive/api/guides/ref-export-formats
 		file_id, mime_type := getFileIdAndMimeType(srv, file_name)
 
+		// Convert this functionality to a function
+		if value, exists := gdrive_mime_types[mime_type]; exists {
+			fmt.Printf("GDrive Specific Mime Type: %s\nValue: %s\n", mime_type, value)
+		} else if value, exists := other_mime_types[mime_type]; exists {
+			fmt.Printf("Other mime type: %s\nValue: %s\n", mime_type, value)
+		} else {
+			fmt.Printf("Mime type %s does not exist\n", mime_type)
+		}
+
+		// Add logic to handle export the file if it is a gdrive_mime_type and a get function if it is a other mime type
 		resp, err := srv.Files.Export(file_id, "application/pdf").Download()
 		if err != nil {
 			log.Fatalf("Unable to export file: %v", err)
