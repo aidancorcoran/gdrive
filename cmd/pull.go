@@ -61,6 +61,7 @@ var other_mime_types = map[string]string{
 	"application/vnd.google-apps.script+json": ".json",
 }
 
+// Main command that handles all the logic with downloading Google Drive files
 var pull_cmd = &cobra.Command{
 	Use:   "pull [file name]",
 	Short: "Download a file from Google Drive",
@@ -72,40 +73,54 @@ var pull_cmd = &cobra.Command{
 			log.Fatalf("Unable to retrieve Drive client: %v", err)
 		}
 
-		// Need to work on converting the mime_type from the Google Api to an appropriate exportable value
-		// https://developers.google.com/drive/api/guides/ref-export-formats
 		file_id, mime_type := getFileIdAndMimeType(srv, file_name)
 
-		// Convert this functionality to a function
 		file_extension, err := getFileExtension(mime_type)
 		if err != nil {
 			log.Fatalf("Error: %v", err)
 		}
-		// Need to run .get for the other_mime_types
-		print(file_extension)
-		srv.Files.Get()
-		// Add logic to handle export the file if it is a gdrive_mime_type and a get function if it is a other mime type
-		resp, err := srv.Files.Export(file_id, mime_type).Download()
-		if err != nil {
-			log.Fatalf("Unable to export file: %v", err)
-		}
-		defer resp.Body.Close()
 
-		// Create a local file to save the exported content
-		localFileName := file_name + ".pdf"
-		outFile, err := os.Create(localFileName)
+		resp, err := downloadGoogleDriveFiles(srv, file_id, file_extension, file_name)
 		if err != nil {
-			log.Fatalf("Unable to create local file: %v", err)
-		}
-		defer outFile.Close()
-
-		_, err = io.Copy(outFile, resp.Body)
-		if err != nil {
-			log.Fatalf("Unable to save file: %v", err)
+			log.Fatalf("Error: Downloading Google Drive Files: %v\n", err)
 		}
 
-		fmt.Printf("File '%s' exported and downloaded as '%s' successfully\n", file_name, localFileName)
+		fmt.Printf("File '%s' exported and downloaded as '%s' successfully\n", file_name, resp)
 	},
+}
+
+func downloadGoogleDriveFiles(srv *drive.Service, file_id string, file_extension string, file_name string) (string, error) {
+	resp, err := srv.Files.Export(file_id, getExportMimeType(file_extension)).Download()
+	if err != nil {
+		return "", fmt.Errorf("unable to export file: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Need to handle weird file names
+	local_file_name := file_name + file_extension
+	out_file, err := os.Create(local_file_name)
+	if err != nil {
+		return "", fmt.Errorf("unable to create local file: %v", err)
+	}
+	defer out_file.Close()
+
+	_, err = io.Copy(out_file, resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("unable to save local file: %v", err)
+	}
+
+	return local_file_name, nil
+}
+
+// We error checked the file extension in getFileExtension()
+func getExportMimeType(file_extension string) string {
+	// Determine the MIME type from the extension
+	for key, val := range other_mime_types {
+		if val == file_extension {
+			return key
+		}
+	}
+	return ""
 }
 
 func getFileIdAndMimeType(srv *drive.Service, file_name string) (string, string) {
@@ -120,7 +135,6 @@ func getFileIdAndMimeType(srv *drive.Service, file_name string) (string, string)
 	}
 
 	file := file_list.Files[0]
-	fmt.Printf("Found file: %s (ID: %s, MIME Type: %s)\n", file_name, file.Id, file.MimeType)
 	return file.Id, file.MimeType
 }
 
