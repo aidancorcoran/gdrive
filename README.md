@@ -25,5 +25,8 @@ Currently, `gdrive` can be compiled from source:
 git clone https://github.com/aidancorcoran/gdrive.git
 cd gdrive
 
-# Build the binary
+# Build the executable
+go build
+
+# Build the binary and add it to your PATH
 go build -o gdrive
