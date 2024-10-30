@@ -68,16 +68,16 @@ func TestGetFileExtension(t *testing.T) {
 		{"application/vnd.google-apps.script+json", ".json", false},
 
 		// Error cases: unknown MIME type
-		{"application/unknown-type", "", true},
+		{"random/mime-type", "", true},
 	}
 
 	for _, test := range tests {
 		ext, err := cmd.GetFileExtension(test.mimeType)
 		if test.expectedErr {
-			assert.Error(t, err)
+			assert.Error(t, err) // Ensure an error was returned by GetFileExtension
 		} else {
 			assert.NoError(t, err)
-			assert.Equal(t, test.expectedExt, ext)
+			assert.Equal(t, test.expectedExt, ext) // Ensure nil was returned by GetFileExtension
 		}
 	}
 }

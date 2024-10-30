@@ -30,3 +30,18 @@ go build
 
 # Build the binary and add it to your PATH
 go build -o gdrive
+```
+
+### Unit Testing
+
+`gdrive` includes a suite of unit tests to ensure that the application functions as expected. These tests cover various scenarios, including handling of different MIME types, error cases, and validation of core functionality.
+
+To run the unit tests, follow these steps:
+
+1. **Navigate to the Project Directory**: Make sure you are in the root directory of the project (where `go.mod` is located).
+
+2. **Run All Tests**: Use the following command to run all unit tests in the project:
+
+   ```bash
+   go test ./tests
+   ```
