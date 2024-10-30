@@ -75,7 +75,7 @@ var pull_cmd = &cobra.Command{
 
 		file_id, mime_type := getFileIdAndMimeType(srv, file_name)
 
-		file_extension, err := getFileExtension(mime_type)
+		file_extension, err := GetFileExtension(mime_type)
 		if err != nil {
 			log.Fatalf("Error: %v", err)
 		}
@@ -112,7 +112,7 @@ func downloadGoogleDriveFiles(srv *drive.Service, file_id string, file_extension
 	return local_file_name, nil
 }
 
-// We error checked the file extension in getFileExtension()
+// We error checked the file extension in GetFileExtension()
 func getExportMimeType(file_extension string) string {
 	// Determine the MIME type from the extension
 	for key, val := range other_mime_types {
@@ -138,7 +138,7 @@ func getFileIdAndMimeType(srv *drive.Service, file_name string) (string, string)
 	return file.Id, file.MimeType
 }
 
-func getFileExtension(mime_type string) (string, error) {
+func GetFileExtension(mime_type string) (string, error) {
 	if extension, exists := gdrive_mime_types[mime_type]; exists {
 		return extension, nil
 	} else if extension, exists := other_mime_types[mime_type]; exists {
