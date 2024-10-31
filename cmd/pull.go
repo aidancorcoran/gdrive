@@ -73,7 +73,10 @@ var pull_cmd = &cobra.Command{
 			log.Fatalf("Unable to retrieve Drive client: %v", err)
 		}
 
-		file_id, mime_type := getFileIdAndMimeType(srv, file_name)
+		file_id, mime_type, err := GetFileIdAndMimeType(srv, file_name)
+		if err != nil {
+			log.Fatalf("Error: %v", err)
+		}
 
 		file_extension, err := GetFileExtension(mime_type)
 		if err != nil {
@@ -123,19 +126,19 @@ func getExportMimeType(file_extension string) string {
 	return ""
 }
 
-func getFileIdAndMimeType(srv *drive.Service, file_name string) (string, string) {
+func GetFileIdAndMimeType(srv *drive.Service, file_name string) (string, string, error) {
 	query := fmt.Sprintf("name = '%s'", file_name)
 
 	file_list, err := srv.Files.List().Q(query).Fields("files(id, mimeType)").Do()
 	if err != nil {
-		log.Fatalf("Unable to retrieve files: %v", err)
+		return "", "", fmt.Errorf("unable to retrieve files: %v", err)
 	}
 	if len(file_list.Files) == 0 {
-		return "", ""
+		return "", "", fmt.Errorf("no files found")
 	}
 
 	file := file_list.Files[0]
-	return file.Id, file.MimeType
+	return file.Id, file.MimeType, nil
 }
 
 func GetFileExtension(mime_type string) (string, error) {

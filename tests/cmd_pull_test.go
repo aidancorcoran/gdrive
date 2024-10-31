@@ -81,3 +81,7 @@ func TestGetFileExtension(t *testing.T) {
 		}
 	}
 }
+
+func TestGetFileIdAndMimeType(t *testing.T) {
+
+}
