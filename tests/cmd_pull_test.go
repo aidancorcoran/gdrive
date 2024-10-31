@@ -83,5 +83,8 @@ func TestGetFileExtension(t *testing.T) {
 }
 
 func TestGetFileIdAndMimeType(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
+	// Need to setup a mock drive service in order to test this function
 }
