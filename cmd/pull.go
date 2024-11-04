@@ -91,7 +91,7 @@ var pull_cmd = &cobra.Command{
 			}
 			fmt.Printf("File '%s' exported and downloaded as '%s' successfully\n", file_name, resp)
 		} else { // If the file is not a Drive file type just need to run Get()
-			resp, err := downloadAlternateDriveFiles(srv, file_id, file_extension, file_name)
+			resp, err := downloadAlternateDriveFiles(srv, file_id, file_name)
 			if err != nil {
 				log.Fatalf("Error: Downloading Google Drive Files: %v\n", err)
 			}
@@ -100,7 +100,7 @@ var pull_cmd = &cobra.Command{
 	},
 }
 
-func downloadAlternateDriveFiles(srv *drive.Service, file_id string, file_extension string, file_name string) (string, error) {
+func downloadAlternateDriveFiles(srv *drive.Service, file_id string, file_name string) (string, error) {
 	resp, err := srv.Files.Get(file_id).Download()
 	if err != nil {
 		return "", fmt.Errorf("unable to get file: %v", err)
