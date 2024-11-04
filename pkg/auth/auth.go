@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/pkg/browser"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/drive/v3"
@@ -49,7 +50,9 @@ func getClient(config *oauth2.Config) *http.Client {
 func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 	// Redirect URI set to the local server
 	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline, oauth2.SetAuthURLParam("redirect_uri", "http://localhost:8080/callback"))
-	fmt.Printf("Go to the following link in your browser: %v\n", authURL)
+
+	// Open the authURL in default browser
+	browser.OpenURL(authURL)
 
 	// Get authorization code from the redirect server
 	authCode := getAuthCodeFromRedirect()
