@@ -83,13 +83,43 @@ var pull_cmd = &cobra.Command{
 			log.Fatalf("Error: %v", err)
 		}
 
-		resp, err := downloadGoogleDriveFiles(srv, file_id, file_extension, file_name)
-		if err != nil {
-			log.Fatalf("Error: Downloading Google Drive Files: %v\n", err)
+		// If the file is a Google Drive file type have to export it
+		if _, exists := gdrive_mime_types[mime_type]; exists {
+			resp, err := downloadGoogleDriveFiles(srv, file_id, file_extension, file_name)
+			if err != nil {
+				log.Fatalf("Error: Exporting Google Drive Files: %v\n", err)
+			}
+			fmt.Printf("File '%s' exported and downloaded as '%s' successfully\n", file_name, resp)
+		} else { // If the file is not a Drive file type just need to run Get()
+			resp, err := downloadAlternateDriveFiles(srv, file_id, file_extension, file_name)
+			if err != nil {
+				log.Fatalf("Error: Downloading Google Drive Files: %v\n", err)
+			}
+			fmt.Printf("File '%s' exported and downloaded as '%s' successfully\n", file_name, resp)
 		}
-
-		fmt.Printf("File '%s' exported and downloaded as '%s' successfully\n", file_name, resp)
 	},
+}
+
+func downloadAlternateDriveFiles(srv *drive.Service, file_id string, file_extension string, file_name string) (string, error) {
+	resp, err := srv.Files.Get(file_id).Download()
+	if err != nil {
+		return "", fmt.Errorf("unable to get file: %v", err)
+	}
+	defer resp.Body.Close()
+
+	local_file_name := file_name
+	out_file, err := os.Create(local_file_name)
+	if err != nil {
+		return "", fmt.Errorf("unable to create local file: %v", err)
+	}
+	defer out_file.Close()
+
+	_, err = io.Copy(out_file, resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("unable to save local file: %v", err)
+	}
+
+	return local_file_name, nil
 }
 
 func downloadGoogleDriveFiles(srv *drive.Service, file_id string, file_extension string, file_name string) (string, error) {
